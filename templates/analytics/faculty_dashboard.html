@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block page_title %}Faculty Dashboard{% endblock %}
+{% block content %}
+<style>
+.faculty-dashboard .stat-card {
+    border: none;
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.faculty-dashboard .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+}
+.faculty-dashboard .stat-card .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+.faculty-dashboard .chart-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+.faculty-dashboard .chart-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.faculty-dashboard .chart-card .card-header {
+    border: none;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: #334155;
+}
+.faculty-dashboard .ranking-table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+.faculty-dashboard .ranking-table thead th {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #fff;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    border: none;
+}
+.faculty-dashboard .ranking-table tbody tr {
+    transition: background 0.15s;
+}
+.faculty-dashboard .ranking-table tbody tr:hover {
+    background: #f8fafc;
+}
+.faculty-dashboard .ranking-table .rank-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+.faculty-dashboard .ranking-table .rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; }
+.faculty-dashboard .ranking-table .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+.faculty-dashboard .ranking-table .rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+.faculty-dashboard .ranking-table .rank-default { background: #e2e8f0; color: #475569; }
+</style>
+
+<div class="faculty-dashboard">
+    <!-- Quick Actions -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="{% url 'attendance:faculty_dashboard' %}" class="btn btn-primary"><i class="bi bi-qr-code-scan me-2"></i>Take Attendance</a>
+        <a href="{% url 'results:faculty_courses' %}" class="btn btn-outline-primary"><i class="bi bi-upload me-2"></i>Upload Results</a>
+        <a href="{% url 'assignments:list' %}" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-text me-2"></i>Assignments</a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card card shadow-sm" style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: #fff;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1 opacity-75 small text-uppercase fw-semibold">Courses</p>
+                        <h3 class="mb-0 fw-bold">{{ total_courses|default:0 }}</h3>
+                    </div>
+                    <div class="stat-icon bg-white bg-opacity-25">
+                        <i class="bi bi-book"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card shadow-sm" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1 opacity-75 small text-uppercase fw-semibold">Students</p>
+                        <h3 class="mb-0 fw-bold">{{ total_students|default:0 }}</h3>
+                    </div>
+                    <div class="stat-icon bg-white bg-opacity-25">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card shadow-sm" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1 opacity-75 small text-uppercase fw-semibold">QR Sessions</p>
+                        <h3 class="mb-0 fw-bold">{{ total_sessions|default:0 }}</h3>
+                    </div>
+                    <div class="stat-icon bg-white bg-opacity-25">
+                        <i class="bi bi-qr-code"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="chart-card card">
+                <div class="card-header"><i class="bi bi-bar-chart-fill me-2"></i>Class Performance</div>
+                <div class="card-body p-4">
+                    <canvas id="perfChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card card">
+                <div class="card-header"><i class="bi bi-person-check-fill me-2"></i>Attendance Sessions</div>
+                <div class="card-body p-4">
+                    <canvas id="attChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Ranking -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="chart-card card">
+                <div class="card-header"><i class="bi bi-trophy-fill me-2"></i>Student Ranking</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table ranking-table mb-0">
+                            <thead>
+                                <tr><th style="width:60px">#</th><th>Student</th><th style="width:120px">GPA</th></tr>
+                            </thead>
+                            <tbody>
+                            {% for r in rankings %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="rank-badge rank-{% if forloop.counter <= 3 %}{{ forloop.counter }}{% else %}default{% endif %}">{{ forloop.counter }}</span>
+                                </td>
+                                <td class="fw-medium">{{ r.student.get_full_name|default:r.student.username }}</td>
+                                <td><span class="badge rounded-pill bg-primary">{{ r.gpa }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center py-4 text-muted">No data yet</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+Chart.defaults.font.family = "'Plus Jakarta Sans', -apple-system, sans-serif";
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = '#e2e8f0';
+
+const perfCtx = document.getElementById('perfChart');
+if (perfCtx) {
+    new Chart(perfCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for d in perf_data %}'{{ d.course }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Avg Grade',
+                data: [{% for d in perf_data %}{{ d.avg }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [
+                    'rgba(13, 148, 136, 0.8)',
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(236, 72, 153, 0.8)'
+                ],
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, max: 4, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+const attCtx = document.getElementById('attChart');
+if (attCtx) {
+    new Chart(attCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for d in att_data %}'{{ d.session }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Present',
+                data: [{% for d in att_data %}{{ d.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.7)',
+                    'rgba(13, 148, 136, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(236, 72, 153, 0.7)',
+                    'rgba(34, 197, 94, 0.7)'
+                ],
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

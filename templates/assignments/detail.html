@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block page_title %}{{ assignment.title }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">{{ assignment.title }}</h5></div>
+    <div class="card-body">
+        <p><strong>Course:</strong> {{ assignment.semester_course.course.code }}</p>
+        <p><strong>Deadline:</strong> {{ assignment.deadline|date:"M d, Y H:i" }}</p>
+        <p>{{ assignment.description }}</p>
+        {% if assignment.attachment %}
+        <a href="{{ assignment.attachment.url }}" class="btn btn-outline-primary" download>Download Attachment</a>
+        {% endif %}
+        {% if user.role == 'STUDENT' and not submission and not assignment.is_past_deadline %}
+        <hr>
+        <a href="{% url 'assignments:submit' assignment.id %}" class="btn btn-primary">Submit</a>
+        {% elif submission %}
+        <hr>
+        <p><strong>Your submission:</strong> <a href="{{ submission.file.url }}" download>{{ submission.file.name }}</a></p>
+        <p>Submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}{% if submission.is_late %} <span class="badge bg-warning">Late</span>{% endif %}</p>
+        {% if submission.marks is not None %}<p>Marks: {{ submission.marks }}/{{ assignment.max_marks }}</p>{% endif %}
+        {% endif %}
+        {% if user.role == 'FACULTY' and assignment.created_by == user %}
+        <hr>
+        <h6>Submissions</h6>
+        <table class="table">
+            {% for s in assignment.submissions.all %}
+            <tr>
+                <td>{{ s.student.get_full_name|default:s.student.username }}</td>
+                <td>{{ s.submitted_at|date:"M d H:i" }}{% if s.is_late %} <span class="badge bg-warning">Late</span>{% endif %}</td>
+                <td><a href="{% url 'assignments:grade' s.id %}">Grade</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">No submissions</td></tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

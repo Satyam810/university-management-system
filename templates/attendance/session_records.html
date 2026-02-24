@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block page_title %}Attendance Records - {{ qr_session.semester_course.course.code }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="mb-0">Records for {{ qr_session.created_at|date:"M d, Y H:i" }}</h5>
+        <a href="{% url 'attendance:download_csv' qr_session.session_id %}" class="btn btn-sm btn-outline-primary">Download CSV</a>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead><tr><th>Student</th><th>Enrollment</th><th>Status</th><th>Time</th></tr></thead>
+            <tbody>
+            {% for r in records %}
+            <tr>
+                <td>{{ r.student.get_full_name|default:r.student.username }}</td>
+                <td>{% if r.student.student_profile %}{{ r.student.student_profile.enrollment_number }}{% else %}-{% endif %}</td>
+                <td><span class="badge bg-{% if r.status == 'PRESENT' %}success{% elif r.status == 'LATE' %}warning{% else %}secondary{% endif %}">{{ r.status }}</span></td>
+                <td>{{ r.marked_at|date:"H:i:s" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No attendance marked yet</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

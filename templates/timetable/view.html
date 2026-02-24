@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Timetable{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">Weekly Timetable</h5></div>
+    <div class="card-body">
+        {% if entries %}
+        <table class="table">
+            <thead><tr><th>Day</th><th>Time</th><th>Course</th><th>Room</th></tr></thead>
+            <tbody>
+            {% for e in entries %}
+            <tr><td>{{ e.slot.get_day_display }}</td><td>{{ e.slot.start_time }}-{{ e.slot.end_time }}</td><td>{{ e.semester_course.course.code }} - {{ e.semester_course.course.name }}</td><td>{{ e.classroom.name|default:"-" }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No timetable entries.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

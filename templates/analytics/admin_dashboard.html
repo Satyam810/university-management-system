@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Total Students</h6>
+                <h3 class="card-title">{{ total_students }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Total Faculty</h6>
+                <h3 class="card-title">{{ total_faculty }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Total Courses</h6>
+                <h3 class="card-title">{{ total_courses }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">Pass/Fail Ratio</h6>
+                <h3 class="card-title">{{ pass_count }}/{{ fail_count }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Course Distribution</h5></div>
+            <div class="card-body">
+                <canvas id="deptChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Pass/Fail Ratio</h5></div>
+            <div class="card-body">
+                <canvas id="passFailChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Enrollment Growth</h5></div>
+            <div class="card-body">
+                <canvas id="enrollmentChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Admin Actions</h5></div>
+            <div class="card-body">
+                <h6 class="text-muted mb-2">User Management</h6>
+                <a href="{% url 'accounts:user_list' %}" class="btn btn-primary me-2 mb-2"><i class="bi bi-people"></i> All Users</a>
+                <a href="{% url 'accounts:user_create' %}" class="btn btn-success me-2 mb-2"><i class="bi bi-person-plus"></i> Add User</a>
+                <h6 class="text-muted mb-2 mt-3">Academics</h6>
+                <a href="{% url 'academics:department_list' %}" class="btn btn-outline-primary me-2 mb-2">Departments</a>
+                <a href="{% url 'academics:course_list' %}" class="btn btn-outline-primary me-2 mb-2">Courses</a>
+                <a href="{% url 'academics:semester_list' %}" class="btn btn-outline-primary me-2 mb-2">Semesters</a>
+                <a href="{% url 'timetable:admin' %}" class="btn btn-outline-primary me-2 mb-2">Timetable</a>
+                <h6 class="text-muted mb-2 mt-3">Content</h6>
+                <a href="{% url 'core:announcement_list' %}" class="btn btn-outline-primary me-2 mb-2">Announcements</a>
+                <a href="{% url 'core:event_list' %}" class="btn btn-outline-primary me-2 mb-2">Events</a>
+                <a href="/admin/" class="btn btn-outline-secondary mb-2" target="_blank">Django Admin</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="deptData" type="application/json">{{ department_data }}</script>
+<script id="enrollData" type="application/json">{{ enrollment_data }}</script>
+<script>
+const deptData = JSON.parse(document.getElementById('deptData').textContent);
+const enrollData = JSON.parse(document.getElementById('enrollData').textContent);
+new Chart(document.getElementById('deptChart'), {
+    type: 'bar',
+    data: {
+        labels: deptData.map(d => d.name),
+        datasets: [{ label: 'Students', data: deptData.map(d => d.student_count), backgroundColor: 'rgba(54, 162, 235, 0.6)' }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+new Chart(document.getElementById('passFailChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Pass', 'Fail'],
+        datasets: [{ data: [{{ pass_count }}, {{ fail_count }}], backgroundColor: ['#28a745', '#dc3545'] }]
+    },
+    options: { responsive: true }
+});
+new Chart(document.getElementById('enrollmentChart'), {
+    type: 'line',
+    data: {
+        labels: enrollData.map(d => d.name),
+        datasets: [{ label: 'Enrolled', data: enrollData.map(d => d.count), borderColor: '#17a2b8', fill: true }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+</script>
+{% endblock %}

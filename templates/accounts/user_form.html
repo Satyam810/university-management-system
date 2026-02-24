@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block page_title %}{% if form.password1 %}Create User{% else %}Edit User{% endif %}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{% if form.password1 %}Create User{% else %}Edit User{% endif %}</h5>
+        <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-secondary">Back to List</a>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">{% if form.password1 %}Create{% else %}Update{% endif %}</button>
+            <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

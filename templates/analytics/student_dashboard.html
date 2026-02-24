@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block page_title %}Student Dashboard{% endblock %}
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6>Attendance %</h6>
+                <h3>{{ attendance_pct }}%</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6>Latest GPA</h6>
+                <h3>{% if results %}{{ results.0.gpa }}{% else %}N/A{% endif %}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6>Classification</h6>
+                <h3>{% if results %}{{ results.0.classification|default:"-" }}{% else %}-{% endif %}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">GPA Trend</h5></div>
+            <div class="card-body">
+                <canvas id="gpaChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Quick Links</h5></div>
+            <div class="card-body">
+                <a href="{% url 'attendance:student_view' %}" class="btn btn-outline-primary d-block mb-2">Scan Attendance</a>
+                <a href="{% url 'results:student_results' %}" class="btn btn-outline-primary d-block mb-2">View Results</a>
+                <a href="{% url 'core:document_grade_report' %}" class="btn btn-outline-primary d-block mb-2">Download Grade Report</a>
+                <a href="{% url 'core:document_bonafide' %}" class="btn btn-outline-primary d-block mb-2">Bonafide Certificate</a>
+                <a href="{% url 'core:document_admit_card' %}" class="btn btn-outline-primary d-block mb-2">Admit Card</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const gpaData = {{ gpa_data|safe }};
+new Chart(document.getElementById('gpaChart'), {
+    type: 'line',
+    data: {
+        labels: gpaData.map(d => d.semester),
+        datasets: [{ label: 'GPA', data: gpaData.map(d => d.gpa), borderColor: '#0d6efd', fill: true }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true, max: 4 } } }
+});
+</script>
+{% endblock %}

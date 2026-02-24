@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block page_title %}User Management{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>All Users</h5>
+        <a href="{% url 'accounts:user_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add User</a>
+    </div>
+    <div class="card-body">
+        <div class="d-flex gap-2 mb-3">
+            <a href="?role=" class="btn btn-sm {% if not request.GET.role %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+            <a href="?role=ADMIN" class="btn btn-sm {% if request.GET.role == 'ADMIN' %}btn-danger{% else %}btn-outline-danger{% endif %}">Admins</a>
+            <a href="?role=FACULTY" class="btn btn-sm {% if request.GET.role == 'FACULTY' %}btn-info{% else %}btn-outline-info{% endif %}">Faculty</a>
+            <a href="?role=STUDENT" class="btn btn-sm {% if request.GET.role == 'STUDENT' %}btn-success{% else %}btn-outline-success{% endif %}">Students</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Active</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ u.username }}</td>
+                    <td>{{ u.get_full_name|default:"-" }}</td>
+                    <td>
+                        <span class="badge {% if u.role == 'ADMIN' %}bg-danger{% elif u.role == 'FACULTY' %}bg-info{% else %}bg-success{% endif %}">{{ u.get_role_display }}</span>
+                    </td>
+                    <td>{{ u.email|default:"-" }}</td>
+                    <td>{% if u.is_active %}<span class="text-success">Yes</span>{% else %}<span class="text-danger">No</span>{% endif %}</td>
+                    <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'accounts:user_edit' u.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        {% if u != user and not u.is_superuser %}
+                        <form method="post" action="{% url 'accounts:user_delete' u.pk %}" class="d-inline" onsubmit="return confirm('Delete this user?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-4 text-muted">No users found</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        <nav class="mt-3">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&role={{ request.GET.role }}">Previous</a></li>{% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&role={{ request.GET.role }}">Next</a></li>{% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

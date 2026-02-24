@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block page_title %}Timetable Admin{% endblock %}
+{% block content %}
+{% if conflicts %}
+<div class="alert alert-warning">Conflicts detected: {{ conflicts|join:", " }}</div>
+{% endif %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">All Timetable Entries</h5></div>
+    <div class="card-body">
+        <table class="table">
+            <thead><tr><th>Course</th><th>Slot</th><th>Classroom</th></tr></thead>
+            <tbody>
+            {% for e in entries %}
+            <tr><td>{{ e.semester_course.course.code }}</td><td>{{ e.slot.day }} {{ e.slot.start_time }}-{{ e.slot.end_time }}</td><td>{{ e.classroom.name|default:"-" }}</td></tr>
+            {% empty %}
+            <tr><td colspan="3">No entries</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

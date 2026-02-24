@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block page_title %}Grades - {{ semester_course.course.code }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="mb-0">{{ semester_course.course.code }} - Grades</h5>
+        <a href="{% url 'results:upload_grades' semester_course.id %}" class="btn btn-sm btn-primary">Edit</a>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead><tr><th>Student</th><th>Grade</th><th>Points</th></tr></thead>
+            <tbody>
+            {% for g in grades %}
+            <tr><td>{{ g.student.get_full_name|default:g.student.username }}</td><td>{{ g.grade_point.grade }}</td><td>{{ g.grade_point.point }}</td></tr>
+            {% empty %}
+            <tr><td colspan="3">No grades yet</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

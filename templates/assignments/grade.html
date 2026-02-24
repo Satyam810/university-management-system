@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block page_title %}Grade Submission{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">Grade: {{ submission.student.get_full_name }} - {{ submission.assignment.title }}</h5></div>
+    <div class="card-body">
+        <p><a href="{{ submission.file.url }}" download>Download submission</a></p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Marks (max {{ submission.assignment.max_marks }})</label>
+                <input type="number" name="marks" class="form-control" value="{{ submission.marks|default:'' }}" max="{{ submission.assignment.max_marks }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Feedback</label>
+                <textarea name="feedback" class="form-control" rows="3">{{ submission.feedback }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

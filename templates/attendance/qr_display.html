@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block page_title %}QR Code - {{ qr_session.semester_course.course.code }}{% endblock %}
+{% block content %}
+<div class="card text-center" style="max-width: 400px; margin: 0 auto;">
+    <div class="card-header"><h5 class="mb-0">Scan to Mark Attendance</h5></div>
+    <div class="card-body">
+        <p class="text-muted small">Valid for 3 minutes | Current: {% now "H:i" %}</p>
+        <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code" class="img-fluid" style="max-width: 250px;">
+        <p class="mt-2 small">Session: {{ qr_session.session_id|slice:":8" }}...</p>
+        <a href="{% url 'attendance:session_records' qr_session.session_id %}" class="btn btn-primary">View Records</a>
+    </div>
+</div>
+{% endblock %}

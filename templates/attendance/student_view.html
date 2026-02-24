@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block page_title %}Attendance - Scan QR{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">Mark Attendance via QR</h5></div>
+    <div class="card-body">
+        <p>Scan the QR code displayed by your faculty in class to mark your attendance.</p>
+        <div class="mb-3">
+            <label class="form-label">Or enter session ID (from QR):</label>
+            <div class="input-group">
+                <input type="text" id="sessionInput" class="form-control" placeholder="Paste session ID from QR">
+                <button type="button" id="markBtn" class="btn btn-primary">Mark Attendance</button>
+            </div>
+            <div id="result" class="mt-2"></div>
+        </div>
+        <p class="small text-muted">Note: QR is valid for 2-5 minutes. Duplicate attendance is prevented.</p>
+    </div>
+</div>
+<div class="card mt-4">
+    <div class="card-header"><h5 class="mb-0">Your Enrolled Courses</h5></div>
+    <div class="card-body">
+        <ul class="list-group">
+        {% for e in enrollments %}
+        <li class="list-group-item">{{ e.semester_course.course.code }} - {{ e.semester_course.course.name }} ({{ e.semester_course.semester.name }})</li>
+        {% empty %}
+        <li class="list-group-item text-muted">No enrollments</li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+<script>
+document.getElementById('markBtn').onclick = function() {
+    const sid = document.getElementById('sessionInput').value.trim();
+    if (!sid) { document.getElementById('result').innerHTML = '<span class="text-danger">Enter session ID</span>'; return; }
+    const fd = new FormData();
+    fd.append('session_id', sid);
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "attendance:scan_qr" %}', { method: 'POST', body: fd, headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+        .then(r => r.json())
+        .then(d => {
+            const el = document.getElementById('result');
+            if (d.success) el.innerHTML = '<span class="text-success">' + d.message + '</span>';
+            else el.innerHTML = '<span class="text-danger">' + d.message + '</span>';
+        });
+};
+</script>
+{% endblock %}

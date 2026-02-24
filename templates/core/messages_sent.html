@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Sent{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <a href="{% url 'core:message_inbox' %}" class="btn btn-sm btn-outline-secondary">Inbox</a>
+        <a href="{% url 'core:message_compose' %}" class="btn btn-sm btn-primary">Compose</a>
+    </div>
+    <div class="card-body">
+        <div class="list-group">
+        {% for m in messages %}
+        <a href="{% url 'core:message_detail' m.id %}" class="list-group-item list-group-item-action">
+            <strong>To: {{ m.recipient.get_full_name|default:m.recipient.username }}</strong> - {{ m.subject }} ({{ m.sent_at|date:"M d" }})
+        </a>
+        {% empty %}
+        <p class="text-muted">No sent messages.</p>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

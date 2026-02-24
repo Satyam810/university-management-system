@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block page_title %}Compose{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">Compose Message</h5></div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">To</label>
+                <select name="recipient" class="form-select" required>
+                    <option value="">Select user</option>
+                    {% for u in users %}
+                    <option value="{{ u.id }}" {% if preselected and u.id == preselected %}selected{% endif %}>{{ u.get_full_name|default:u.username }} ({{ u.get_role_display }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Subject</label>
+                <input type="text" name="subject" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Message</label>
+                <textarea name="body" class="form-control" rows="5"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block page_title %}Announcements{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Announcements & Notices</h5>
+        {% if user.role == 'ADMIN' %}
+        <a href="{% url 'core:announcement_create' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus"></i> Add</a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% for a in announcements %}
+        <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <h6>{{ a.title }}{% if a.is_featured %} <span class="badge bg-warning">Featured</span>{% endif %}{% if not a.is_active %} <span class="badge bg-secondary">Inactive</span>{% endif %}</h6>
+                {% if user.role == 'ADMIN' %}
+                <div>
+                    <a href="{% url 'core:announcement_edit' a.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form method="post" action="{% url 'core:announcement_delete' a.pk %}" class="d-inline" onsubmit="return confirm('Delete this announcement?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            <p class="text-muted small">{{ a.created_at|date:"M d, Y" }}</p>
+            <p>{{ a.content|truncatewords:50 }}</p>
+        </div>
+        {% empty %}
+        <p class="text-muted">No announcements.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

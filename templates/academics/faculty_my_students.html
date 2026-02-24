@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block page_title %}My Students{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Students in My Courses</h5></div>
+    <div class="card-body">
+        {% for course, students in students_by_course.items %}
+        <div class="mb-4">
+            <h6 class="text-primary">{{ course.course.code }} - {{ course.course.name }}</h6>
+            <p class="small text-muted">{{ course.semester.name }}</p>
+            <table class="table table-sm">
+                <thead><tr><th>#</th><th>Student</th><th>Enrollment</th><th>Action</th></tr></thead>
+                <tbody>
+                {% for s in students %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ s.student.get_full_name|default:s.student.username }}</td>
+                    <td>{{ s.enrollment }}</td>
+                    <td><a href="{% url 'core:message_compose' %}?to={{ s.student.id }}" class="btn btn-sm btn-outline-primary">Message</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">No students enrolled</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% empty %}
+        <p class="text-muted">No courses assigned. Contact admin.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

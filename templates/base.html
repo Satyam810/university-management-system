@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            --accent-teal: #0d9488;
+            --accent-indigo: #6366f1;
+            --accent-amber: #f59e0b;
+        }
+        body { min-height: 100vh; background: #f1f5f9; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 8px 0 32px rgba(0,0,0,0.12);
+        }
+        .sidebar .brand { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .sidebar .brand h5 { font-weight: 700; letter-spacing: -0.5px; }
+        .sidebar .brand small { opacity: 0.7; font-size: 0.8rem; }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.85);
+            padding: 0.7rem 1.25rem;
+            border-radius: 10px;
+            margin: 0.15rem 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .sidebar .nav-link:hover { background: rgba(99, 102, 241, 0.2); color: #fff; }
+        .sidebar .nav-link:hover i { color: var(--accent-teal); }
+        .sidebar .nav-link i { margin-right: 0.5rem; opacity: 0.9; }
+        .sidebar .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); padding: 0.5rem 1rem; margin-top: 0.5rem; }
+        .main-content { margin-left: var(--sidebar-width); padding: 1.75rem; background: #f1f5f9; min-height: 100vh; }
+        .main-content h4 { font-weight: 700; color: #0f172a; letter-spacing: -0.3px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .badge-notification { position: absolute; top: -5px; right: -5px; }
+        .btn-outline-secondary { border-color: #cbd5e1; color: #64748b; }
+        .btn-outline-secondary:hover { background: #f1f5f9; border-color: #94a3b8; color: #475569; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="sidebar">
+        <div class="brand">
+            <h5 class="text-white mb-1"><i class="bi bi-mortarboard-fill" style="color: #2dd4bf"></i> UMS</h5>
+            <small class="text-white-50">{{ user.get_full_name|default:user.username }}</small>
+            <span class="badge bg-secondary ms-1">{{ user.get_role_display }}</span>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:home' %}"><i class="bi bi-house"></i> Dashboard</a>
+            </li>
+
+            {% if user.role == 'ADMIN' %}
+            <li class="nav-section">Admin</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'accounts:user_list' %}"><i class="bi bi-people-fill"></i> User Management</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'academics:department_list' %}"><i class="bi bi-building"></i> Departments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'academics:course_list' %}"><i class="bi bi-book"></i> Courses</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'academics:semester_list' %}"><i class="bi bi-calendar3"></i> Semesters</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'timetable:admin' %}"><i class="bi bi-calendar-check"></i> Timetable</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:announcement_list' %}"><i class="bi bi-megaphone"></i> Announcements</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:event_list' %}"><i class="bi bi-calendar-event"></i> Events</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'analytics:admin_dashboard' %}"><i class="bi bi-graph-up"></i> Analytics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/" target="_blank"><i class="bi bi-gear"></i> Django Admin</a>
+            </li>
+            {% elif user.role == 'FACULTY' %}
+            <li class="nav-section">Faculty</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'attendance:faculty_dashboard' %}"><i class="bi bi-qr-code-scan"></i> Take Attendance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'results:faculty_courses' %}"><i class="bi bi-award"></i> Upload Results</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'assignments:list' %}"><i class="bi bi-file-earmark-text"></i> Assignments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'academics:faculty_my_students' %}"><i class="bi bi-people"></i> My Students</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'analytics:faculty_dashboard' %}"><i class="bi bi-graph-up"></i> My Analytics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'timetable:view' %}"><i class="bi bi-calendar-week"></i> My Timetable</a>
+            </li>
+            <li class="nav-section">General</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:announcement_list' %}"><i class="bi bi-megaphone"></i> Announcements</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:message_inbox' %}"><i class="bi bi-envelope"></i> Messages</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:chatbot' %}"><i class="bi bi-robot"></i> AI Assistant</a>
+            </li>
+            {% else %}
+            <li class="nav-section">Student</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'attendance:student_view' %}"><i class="bi bi-qr-code-scan"></i> Scan Attendance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'results:student_results' %}"><i class="bi bi-award"></i> My Results</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'assignments:list' %}"><i class="bi bi-file-earmark-text"></i> Assignments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'timetable:view' %}"><i class="bi bi-calendar-week"></i> Timetable</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'analytics:student_dashboard' %}"><i class="bi bi-graph-up"></i> My Performance</a>
+            </li>
+            <li class="nav-section">General</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:announcement_list' %}"><i class="bi bi-megaphone"></i> Announcements</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:event_list' %}"><i class="bi bi-calendar-event"></i> Events</a> 
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:message_inbox' %}"><i class="bi bi-envelope"></i> Messages</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:chatbot' %}"><i class="bi bi-robot"></i> AI Assistant</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'core:document_grade_report' %}"><i class="bi bi-file-pdf"></i> Documents</a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item mt-3">
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link border-0 bg-transparent text-start w-100 text-decoration-none"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h4>
+            <div>
+                <a href="{% url 'notifications:list' %}" class="btn btn-outline-secondary btn-sm position-relative me-2">
+                    <i class="bi bi-bell"></i>
+                    {% if unread_notification_count %}<span class="badge bg-danger badge-notification">{{ unread_notification_count }}</span>{% endif %}
+                </a>
+            </div>
+        </div>
+        {% if messages %}
+        {% for m in messages %}
+        <div class="alert alert-{{ m.tags }} alert-dismissible fade show" role="alert">{{ m }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+    {% else %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

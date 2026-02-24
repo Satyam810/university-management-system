@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block page_title %}AI Assistant{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0"><i class="bi bi-robot"></i> AI Chatbot Assistant</h5></div>
+    <div class="card-body">
+        <p class="text-muted">Ask about your attendance, GPA, assignments. Examples: "What is my attendance?", "What is my GPA?"</p>
+        <div class="mb-3">
+            <input type="text" id="query" class="form-control" placeholder="Type your question...">
+            <button type="button" id="askBtn" class="btn btn-primary mt-2">Ask</button>
+        </div>
+        <div id="response" class="alert alert-info" style="display:none;"></div>
+    </div>
+</div>
+<script>
+document.getElementById('askBtn').onclick = function() {
+    const q = document.getElementById('query').value.trim();
+    if (!q) return;
+    const fd = new FormData();
+    fd.append('query', q);
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch('{% url "core:chatbot" %}', {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': '{{ csrf_token }}' }
+    }).then(r => r.json()).then(d => {
+        const el = document.getElementById('response');
+        el.textContent = d.response;
+        el.style.display = 'block';
+    });
+};
+</script>
+{% endblock %}

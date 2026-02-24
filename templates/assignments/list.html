@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block page_title %}Assignments{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">Assignments</h5></div>
+    <div class="card-body">
+        <table class="table">
+            <thead><tr><th>Title</th><th>Course</th><th>Deadline</th><th>Actions</th></tr></thead>
+            <tbody>
+            {% for a in assignments %}
+            <tr>
+                <td>{{ a.title }}</td>
+                <td>{{ a.semester_course.course.code }}</td>
+                <td>{{ a.deadline|date:"M d, Y H:i" }}{% if a.is_past_deadline %} <span class="badge bg-secondary">Past</span>{% endif %}</td>
+                <td>
+                    <a href="{% url 'assignments:detail' a.id %}" class="btn btn-sm btn-primary">View</a>
+                    {% if user.role == 'FACULTY' and a.created_by == user %}
+                    <a href="{% url 'assignments:create' a.semester_course.id %}" class="btn btn-sm btn-outline-secondary">Add New</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No assignments</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% if user.role == 'FACULTY' %}
+        <p class="small text-muted">Create assignments from Results > Upload Grades page (select course).</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block page_title %}Inbox{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="mb-0">Inbox</h5>
+        <a href="{% url 'core:message_compose' %}" class="btn btn-sm btn-primary">Compose</a>
+    </div>
+    <div class="card-body">
+        <div class="list-group">
+            {% for m in messages %}
+            <a href="{% url 'core:message_detail' m.id %}" class="list-group-item list-group-item-action {% if not m.is_read %}list-group-item-primary{% endif %}">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ m.sender.get_full_name|default:m.sender.username }}</strong>
+                    <span class="text-muted">{{ m.sent_at|date:"M d, H:i" }}</span>
+                </div>
+                <p class="mb-0">{{ m.subject }}</p>
+            </a>
+            {% empty %}
+            <p class="text-muted">No messages.</p>
+            {% endfor %}
+        </div>
+        <a href="{% url 'core:message_sent' %}" class="btn btn-outline-secondary mt-2">Sent</a>
+    </div>
+</div>
+{% endblock %}
